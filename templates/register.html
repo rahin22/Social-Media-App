@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+{%import "bootstrap/wtf.html" as wtf%}
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <link href='https://fonts.googleapis.com/css?family=Poppins' rel='stylesheet'>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <title>Register</title>
+    <style>
+        .form-group {
+            margin-bottom: 7px;
+        }
+
+        .logo i {
+            color: var(--bg-color);
+        }
+
+        .logo h2 {
+            color: var(--bg-color);
+        }
+
+        .logocontainer {
+            width: 100%;
+            min-height: 10vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+
+        .logocontainer nav {
+            justify-content: center;
+            padding-right: 0;
+            position: fixed;
+            z-index: 100;
+            width: 100%;
+            height: 80px;
+            transition: all 0.5s;
+        }
+
+        .logo {
+            position: absolute;
+            left: 0px;
+            top: 0;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            display: flex;
+            flex-direction: row;
+        }
+
+        .logo i {
+            font-size: 1.5em;
+            margin: 1em;
+        }
+
+        .logo h2 {
+            font-family: "Poppins";
+            font-size: 20px;
+            padding: 0px;
+            margin: 20px;
+            top: 0;
+            cursor: pointer;
+            left: 40px;
+            position: absolute;
+
+        }
+
+        @media only screen and (max-width: 576px) {
+
+            .logo i,
+            .logo h2 {
+                color: var(--secondary-color);
+            }
+
+        }
+    </style>
+</head>
+
+<div class="logocontainer">
+    <nav>
+        <div class="logo" onclick="homeRedir()">
+            <i class="ri-twitter-x-line"></i>
+            <h2 id="rbac">Yitter?</h2>
+        </div>
+</div>
+
+
+<body>
+    <div id="scrollTop" onclick='scrollToTop()'>
+        <i class="ri-arrow-up-line"></i>
+    </div>
+    <div class="bluecont">
+        <h1>Where Everything Happens</h1>
+        <i class="ri-twitter-x-line mainlogo"></i>
+    </div>
+    <div class="registercont">
+        <div class="register">
+            <form class="registerform" method="POST" action="/register">
+                <h1>Register</h1>
+                {{form.hidden_tag()}}
+                {{wtf.form_field(form.fullname)}}
+                {{wtf.form_field(form.email)}}
+                {{wtf.form_field(form.username)}}
+                <div class="passwordcont">
+                    {{wtf.form_field(form.password)}}
+                    {{wtf.form_field(form.confirm)}}
+                </div>
+                <div class="extrainfcont">
+                    {{wtf.form_field(form.gender)}}
+                    {{wtf.form_field(form.dob)}}
+                </div>
+                <button class="signin">Register<i class="ri-arrow-right-line"></i></button>
+                <span>Already have an account? <a href="/login">Login</a></span>
+            </form>
+
+        </div>
+    </div>
+    <script type="text/javascript" src="{{ url_for('static', filename='main.js') }}"></script>
+</body>
+
+</html>

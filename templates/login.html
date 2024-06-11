@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+{%import "bootstrap/wtf.html" as wtf%}
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <link href='https://fonts.googleapis.com/css?family=Poppins' rel='stylesheet'>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <title>Login / Yitter</title>
+    <style>
+        .form-group {
+            margin-bottom: 7px;
+        }
+
+        .logocontainer {
+            width: 100%;
+            min-height: 10vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+
+        .logocontainer nav {
+            justify-content: center;
+            padding-right: 0;
+            position: fixed;
+            z-index: 100;
+            width: 100%;
+            height: 80px;
+            transition: all 0.5s;
+        }
+
+        .logo {
+            position: absolute;
+            left: 0px;
+            top: 0;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            display: flex;
+            flex-direction: row;
+        }
+
+        .logo i {
+            font-size: 1.5em;
+            margin: 1em;
+            color: var(--secondary-color);
+        }
+
+        .logo h2 {
+            font-family: "Poppins";
+            font-size: 20px;
+            padding: 0px;
+            margin: 20px;
+            top: 0;
+            cursor: pointer;
+            left: 40px;
+            color: var(--secondary-color);
+            position: absolute;
+
+        }
+    </style>
+</head>
+
+<div class="navcontainer">
+    <nav>
+        <div class="nav-logo" onclick="homeRedir()">
+            <i class="ri-twitter-x-line"></i>
+            <h2 id="rbac">Yitter?</h2>
+        </div>
+</div>
+
+
+<body>
+    <div id="scrollTop" onclick='scrollToTop()'>
+        <i class="ri-arrow-up-line"></i>
+    </div>
+
+    <div class="login">
+        <form class="loginform" method="POST" action="/login">
+            <h1>Sign In</h1>
+            {{ form.hidden_tag() }}
+            {{ wtf.form_field(form.username) }}
+            {{ wtf.form_field(form.password) }}
+            <div class="pword"><i class="ri-eye-off-line passwordtoggle"></i></div>
+            {{ wtf.form_field(form.remember) }}
+            <button class="signin" type="submit">Login<i class="ri-arrow-right-line"></i></button>
+        </form>
+        <span>Dont have an account? <a href="/register">Register</a></span>
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        {% for msg in messages %}
+        <p class="deletemsg">{{ msg }}</p>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+    </div>
+
+    <script>
+
+        // Password Visible Toggle
+
+        const password = document.getElementById('password')
+        const toggle = document.querySelector('.ri-eye-off-line')
+
+        toggle.addEventListener("click", () => {
+            if (password.type === "password") {
+                password.type = "text";
+                toggle.classList.replace("ri-eye-off-line", "ri-eye-line");
+            } else {
+                password.type = "password";
+                toggle.classList.replace("ri-eye-line", "ri-eye-off-line");
+            }
+        })
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const oldPasswordToggle = document.querySelector('.oldpasswordtoggle')
+            const newPasswordToggle = document.querySelector('.newpasswordtoggle')
+            const confirmToggle = document.querySelector('.confirmtoggle')
+            const delpasswordToggle = document.querySelector('.delpasswordtoggle')
+
+            function toggleVisibility(fieldId, toggleButton) {
+                const field = document.getElementById(fieldId)
+                if (field.type === "password") {
+                    field.type = "text";
+                    toggleButton.classList.replace("ri-eye-off-line", "ri-eye-line");
+                } else {
+                    field.type = "password";
+                    toggleButton.classList.replace("ri-eye-line", "ri-eye-off-line");
+                }
+            }
+
+            oldPasswordToggle.addEventListener("click", () => {
+                toggleVisibility('oldpassword', oldPasswordToggle)
+            });
+
+            newPasswordToggle.addEventListener("click", () => {
+                toggleVisibility('newpassword', newPasswordToggle)
+            });
+
+            confirmToggle.addEventListener("click", () => {
+                toggleVisibility('confirm', confirmToggle)
+            });
+
+            delpasswordToggle.addEventListener("click", () => {
+                toggleVisibility('delpassword', delpasswordToggle)
+            });
+
+        });
+    </script>
+
+    <script type="text/javascript" src="{{ url_for('static', filename='main.js') }}"></script>
+</body>
+
+</html>

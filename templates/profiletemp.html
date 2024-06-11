@@ -1,0 +1,100 @@
+{% from "macros/navbar.html" import navbar %}
+{% from "macros/imports.html" import head_imports %}
+{% from "macros/imports.html" import bootstrap_scripts %}
+{% from "macros/post_modal.html" import post_modal %}
+{% from "macros/post_display.html" import other_posts %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {{ head_imports() }}
+    <title>{{ userprofile.fullname }} (@{{ userprofile.username }})</title>
+</head>
+
+<body class="override">
+    {{ navbar(current_user) }}
+
+    <div class="profile-info other-pfp">
+        <img src="data:image/png;base64,{{ userprofile.pfp | b64encode }}" alt="Profile Picture" class="profile-pic" style="width: 170px; height: 170px;">
+        <div class="profile-stats">
+            <div class="profile-vital">
+                <h1>{{ userprofile.username }}</h1>
+                <div class="user-interactions">
+                    <form onsubmit="pressFollow(); return false;">
+                        <button type="submit" id="follow-button" class="follow-button" data-user-id="{{ userprofile.id }}" data-is-following="{{ 'true' if followCheck else 'false' }}">Follow</button>
+                    </form>
+                    <form action="/create_conversation" method="post">
+                        <input type="hidden" name="user_id" value="{{ userprofile.id }}">
+                        <button type="submit">Message</button>
+                    </form> 
+                </div>
+            </div>
+            <div class="profile-metrics">
+                <h2>{{ posts }} Posts</h2>
+                <h2 id="follower-count" data-followers="{{ followers }}">{{ followers }} Followers</h2>
+                <h2>{{ following }} Following</h2>
+            </div>
+            <h3>{{ userprofile.fullname }}</h3>
+            <div class="bio-box">
+                <h3>{{ userprofile.bio }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="profile-media">
+        {{ other_posts(userprofile, user_posts, user_likes, user_saved) }}
+    </div>
+
+
+
+    {{ post_modal(current_user) }}
+
+    {{ bootstrap_scripts() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function (){
+            var followButton = document.getElementById('follow-button');
+            var isFollowing = followButton.dataset.isFollowing === 'true';
+
+            if (isFollowing){
+                followButton.innerText = "Following";
+                followButton.classList.add('following');
+            } else{
+              followButton.innerText = "Follow";
+            }
+        });
+
+
+        function pressFollow() {
+            var followButton = document.getElementById('follow-button');
+            var userIdToFollow = followButton.dataset.userId;
+            var userID = JSON.stringify({user_id: userIdToFollow});
+            var followerCountText = document.getElementById('follower-count');
+            var followerCount = parseInt(followerCountText.dataset.followers);
+            var xhttp = new XMLHttpRequest();
+            xhttp.open('POST', '/followUpdate', true);
+            xhttp.setRequestHeader('Content-Type', 'application/json');
+            xhttp.onload = function () {
+                if (xhttp.status === 200) {
+                    var response = JSON.parse(xhttp.responseText);
+                    if (response.is_following) {
+                        followButton.innerText = "Following"; 
+                        followButton.classList.add('following'); 
+                        followButton.dataset.isFollowing = 'true'; 
+                        followerCountText.dataset.followers = followerCount + 1;
+                        followerCountText.innerText = (followerCount + 1) + " Followers";
+                    } else {
+                        followButton.innerText = "Follow"; 
+                        followButton.classList.remove('following'); 
+                        followButton.dataset.isFollowing = 'false'; 
+                        followerCountText.dataset.followers = followerCount - 1;
+                        followerCountText.innerText = (followerCount - 1) + " Followers";
+                    }
+                }
+            }
+            xhttp.send(userID);
+        }
+    </script>
+    <script type="text/javascript" src="{{ url_for('static', filename='main.js') }}"></script>
+</body>
+
+</html>

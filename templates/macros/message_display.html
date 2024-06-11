@@ -1,0 +1,52 @@
+{% macro conversation_display(current_user, user_conversation) %}
+<div class="conversation-master">
+    {% for conversation in user_conversation %}
+    <div class="conversation-container" data-conversation-id='{{ conversation.conversationID }}'>
+        {% if conversation.userID1 != current_user.id %}
+        <img src="data:image/png;base64,{{ conversation.user1.pfp | b64encode }}" alt="Profile Picture"
+            class="profile-pic" id="message-pfp">
+            <div class="conversation-info">
+                <h2>{{ conversation.user1.username }}</h2>
+                <h2>{{ conversation.lastUpdated | to_datetime('%Y-%m-%d_%H-%M-%S') | relative_time }}</h2>
+            </div>
+        {% else %}
+        <img src="data:image/png;base64,{{ conversation.user2.pfp | b64encode }}" alt="Profile Picture" class="profile-pic" id="message-pfp">
+        <div class="conversation-info">
+            <h2>{{ conversation.user2.username }}</h2>
+            <h2>{{ conversation.lastUpdated | to_datetime('%Y-%m-%d_%H-%M-%S') | relative_time }}</h2>
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% endmacro %}
+
+
+{% macro conversation_messages(current_user, conversation_id, messages) %}
+<div class="conversation-messages">
+    <div class="message-list" id="message-list">
+        {% for message in messages %}
+        <div class="message">
+            <div class="date-sent">
+                <p>{{ message.date | to_datetime('%Y-%m-%d_%H-%M-%S') | relative_time }}</p>
+                <p id="date-msg">{{ message.date | to_datetime('%Y-%m-%d_%H-%M-%S') | strftime('%I:%M %p | %b %d, %Y')}}</p>
+            </div>
+            <p>@{{ message.sender.username }}:</p>
+            <p>{{ message.content }}</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="message-form">
+        <form action="/send_message" method="post" id="message-form" onsubmit="sendMessage(event)">
+            <input type="hidden" name="conversation_id" value="{{ conversation_id }}">
+            <textarea name="message" placeholder="Type your message"></textarea>
+            <button type="submit">Send</button>
+        </form>
+    </div>
+</div>
+{% endmacro %}
+
+
+
+

@@ -1,0 +1,79 @@
+{% macro post_modal(current_user) %}
+<!-- Modal -->
+<div class="modal fade" id="postModal" tabindex="-1" role="dialog" aria-labelledby="postModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content custom-modal">
+            <div class="modal-header">
+                <h5 class="modal-title" id="postModalLabel">Create a New Post</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="postForm" action="/create" method="post" enctype="multipart/form-data">
+                    <div class="form-group content">
+                        <img src="data:image/png;base64,{{current_user.pfp | b64encode}}" alt="Profile Picture" class="profile-pic" style="width: 50px; height: 50px;">
+                        <textarea class="form-control" id="postContent" name="postContent" rows="3" required placeholder="What's on your mind?"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="post-image">Want to add some photos?</label>
+                        <input type="file" class="form-control-file" id="post-image" name="post-image" accept=".png, .jpg, .jpeg, .gif" onchange="previewImage(event)">
+                    </div>
+                    <div class="form-group post-preview">
+                        <img id="imagePreview" src="#" alt="Preview" style="max-width: 750px; max-height: 425px; display: none;">
+                    </div>
+                    <div class="modal-footer">
+                        <span id="post_limit">280 characters remaining</span>
+                        <button type="submit" class="btn btn-primary">Post</button>
+                    </div>
+                </form>           
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endmacro %}
+
+
+
+{% macro edit_profile_modal(current_user) %}
+<!-- Modal -->
+<div class="modal fade" id="editProfileModal" tabindex="-1" role="dialog" aria-labelledby="editProfileLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content custom-modal">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editProfileLabel">Edit Profile</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="prevCont">
+                    <img id="previewImage">
+                </div>
+                <form id="editProfileForm" action="" method="post" enctype="multipart/form-data">
+
+                    <div class="form-group">
+                        <label for="profile_picture">Upload Profile Picture</label>
+                        <input type="file" class="form-control-file" id="profile_picture" name="profile_picture"
+                            accept=".png, .jpg, .jpeg, .gif" required>
+                    </div>
+
+                    <div class="form-group content">
+                        <label for="bioContent">Change your bio</label>
+                        <textarea class="form-control" id="bioContent" name="bioContent" rows="3" required>{{ current_user.bio }}</textarea>
+                    </div>
+
+
+                    <div class="modal-footer">
+                        <span id="bio_limit">150 characters remaining</span>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
+                </form>           
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endmacro %}
+

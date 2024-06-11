@@ -1,0 +1,210 @@
+{% from "macros/navbar.html" import navbar %}
+{% from "macros/imports.html" import head_imports %}
+{% from "macros/imports.html" import bootstrap_scripts %}
+{% from "macros/post_modal.html" import post_modal %}
+{% from "macros/post_display.html" import my_posts %}
+{% from "macros/post_display.html" import post_comments %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {{ head_imports() }}
+    <style>
+        .comment-page {
+            margin-bottom: 0px;
+        }
+    </style>
+    <title>Home</title>
+</head>
+
+<body class="override">
+    {{ navbar(current_user) }}
+
+    <div class="profile-media">
+        <div class="post-master">
+            <div class="post-container comment-page">
+                <a href="/profiles/{{ userprofile.username }}" style="text-decoration: none;">
+                    <div class="user-info-container">
+                        <img src="data:image/png;base64,{{ userprofile.pfp | b64encode }}" alt="Profile Picture"
+                            class="profile-pic" style="width: 50px; height: 50px;">
+                        <div class="user-info-flex">
+                            <h2>{{ userprofile.fullname }}</h2>
+                            <h3>@{{ userprofile.username }}</h3>
+                        </div>
+                    </div>
+                </a>
+                <div class="description-container">
+                    <h2>{{ post.desc }}</h2>
+                </div>
+                {% if post.img %}
+                <div class="post-img-container">
+                    <img src="{{ url_for('static', filename= 'posts/' + post.img) }}" alt="Image Description">
+                </div>
+                {% endif %}
+                <div class="post-footer">
+                    <div class="post-interactions">
+                        <i class="ri-heart-line like" id="like-button" data-post-id="{{ post.postID }}"
+                            data-is-liked="{{ 'true' if post.postID in user_likes else 'false' }}"
+                            onclick="pressLikeComment()"></i>
+                        <p id="like-count" data-likes="{{ likeNumber }}">{{ likeNumber }}</p>
+                    </div>
+                    <div class="post-saving">
+                        <i class="ri-bookmark-line save" id="save-button" data-post-id="{{ post.postID }}"
+                            data-is-saved="{{ 'true' if post.postID in user_saved else 'false' }}"
+                            onclick="pressSaveComment()"></i>
+                        <p id="save-count" data-saves="{{ saveNumber }}">{{ saveNumber }}</p>
+                    </div>
+                </div>
+                <div class="post-date">
+                    <p>{{ post.date | to_datetime('%Y-%m-%d_%H-%M-%S') | strftime('%I:%M %p | %b %d, %Y') }}</p>
+                </div>
+            </div>
+            <div class="post-comments">
+                <div class="comment-entry">
+                    <img src="data:image/png;base64,{{ current_user.pfp | b64encode }}" alt="Profile Picture"
+                        class="profile-pic" style="width: 50px; height: 50px;">
+                    <form id="commentForm" method="post" action="/postComment">
+                        <textarea id="comments" name="comments" rows="2" cols="50"
+                            placeholder="Post your comment.."></textarea>
+                        <input type="hidden" name="postID" value="{{ post.postID }}">
+                        <button type="submit" id="comment-button">Post</button>
+                    </form>
+                </div>
+            </div>
+            <h2 id="comment-header">Comments:</h2>
+            {{ post_comments(user_comments, current_user) }}
+        </div>
+    </div>
+    {{ post_modal(current_user) }}
+    {{ bootstrap_scripts() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var likeButton = document.getElementById('like-button');
+            var isLiked = likeButton.dataset.isLiked === 'true';
+            if (isLiked) {
+                likeButton.className = "ri-heart-fill like";
+                likeButton.style.color = "#fe5d9f"
+            } else {
+                likeButton.className = "ri-heart-line like";
+                likeButton.style.color = "var(--text-color)"
+            };
+        });
+
+        function pressLikeComment() {
+            var likeButton = document.getElementById('like-button');
+            var postIdToLike = likeButton.dataset.postId;
+            var postID = JSON.stringify({ postID: postIdToLike });
+            var likeCountText = document.getElementById('like-count');
+            var likeCount = parseInt(likeCountText.dataset.likes);
+
+
+            var xhttp = new XMLHttpRequest();
+            xhttp.open('POST', '/likeUpdate', true);
+            xhttp.setRequestHeader('Content-Type', 'application/json');
+            xhttp.onload = function () {
+                if (xhttp.status === 200) {
+                    var response = JSON.parse(xhttp.responseText);
+                    if (response.is_liked) {
+                        likeButton.className = "ri-heart-fill like";
+                        likeButton.style.color = "#fe5d9f"
+                        likeButton.dataset.isLiked = 'true';
+                        likeCountText.dataset.likes = likeCount + 1;
+                        console.log(likeCountText.dataset.likes)
+                        likeCountText.textContent = likeCount + 1;
+                    } else {
+                        likeButton.className = "ri-heart-line like";
+                        likeButton.style.color = "var(--text-color)"
+                        likeButton.dataset.isLiked = 'false';
+                        likeCountText.dataset.likes = likeCount - 1;
+                        console.log(likeCountText.dataset.likes)
+                        likeCountText.textContent = likeCount - 1;
+                    }
+                }
+            }
+            xhttp.send(postID);
+        }
+
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var saveButton = document.getElementById('save-button');
+            var isSaved = saveButton.dataset.isSaved === 'true';
+            if (isSaved) {
+                saveButton.className = "ri-bookmark-fill save";
+                saveButton.style.color = "#eed202"
+            } else {
+                saveButton.className = "ri-bookmark-line save";
+                saveButton.style.color = "var(--text-color)"
+            };
+        });
+
+        function pressSaveComment() {
+            var saveButton = document.getElementById('save-button');
+            var postIdToSave = saveButton.dataset.postId;
+            var postID = JSON.stringify({ postID: postIdToSave });
+            var saveCountText = document.getElementById('save-count');
+            var saveCount = parseInt(saveCountText.dataset.saves);
+
+
+            var xhttp = new XMLHttpRequest();
+            xhttp.open('POST', '/savePost', true);
+            xhttp.setRequestHeader('Content-Type', 'application/json');
+            xhttp.onload = function () {
+                if (xhttp.status === 200) {
+                    var response = JSON.parse(xhttp.responseText);
+                    if (response.is_saved) {
+                        saveButton.className = "ri-bookmark-fill save";
+                        saveButton.style.color = "#eed202"
+                        saveButton.dataset.isSaved = 'true';
+                        saveCountText.dataset.saves = saveCount + 1;
+                        console.log(saveCountText.dataset.saves)
+                        saveCountText.textContent = saveCount + 1;
+                    } else {
+                        saveButton.className = "ri-bookmark-line save";
+                        saveButton.style.color = "var(--text-color)"
+                        saveButton.dataset.isSaved = 'false';
+                        saveCountText.dataset.saves = saveCount - 1;
+                        console.log(saveCountText.dataset.saves)
+                        saveCountText.textContent = saveCount - 1;
+                    }
+                }
+            }
+            xhttp.send(postID);
+        }
+
+        function submitDeleteForm(index) {
+            var form = document.getElementById('commentForm' + index);
+            var deleteButton = form.querySelector('.btn-danger');
+            var deleteAction = deleteButton.getAttribute('data-action');
+            form.action = deleteAction;
+            form.submit();
+        }
+
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var maxCharacters = 150;
+            document.querySelectorAll('[id^=commentDescription]').forEach(function (commentEdit, index) {
+                var postLimit = document.getElementById('post_limit_' + (index + 1));
+                commentEdit.addEventListener('input', function () {
+                    var remainingCharacters = maxCharacters - commentEdit.value.length;
+                    postLimit.textContent = remainingCharacters + ' characters remaining';
+
+                    if (remainingCharacters <= 0) {
+                        commentEdit.value = commentEdit.value.slice(0, maxCharacters);
+                        remainingCharacters = 0;
+                        postLimit.textContent = remainingCharacters + ' characters remaining';
+                    }
+                });
+
+                commentEdit.addEventListener('keydown', function (event) {
+                    var remainingCharacters = maxCharacters - commentEdit.value.length;
+                    if (remainingCharacters <= 0 && event.key !== 'Backspace' && event.key !== 'Delete') {
+                        event.preventDefault();
+                    }
+                });
+            });
+        });
+    </script>
+    <script type="text/javascript" src="{{ url_for('static', filename='main.js') }}"></script>
+</body>
+
+</html>

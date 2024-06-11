@@ -1,0 +1,313 @@
+{% macro my_posts(current_user, user_posts, user_likes, user_saved) %}
+<div class="post-master">
+    {% for post in user_posts %}
+    <div class="post-container">
+        <div class="user-info-container">
+            <img src="data:image/png;base64,{{ current_user.pfp | b64encode }}" alt="Profile Picture"
+                class="profile-pic" style="width: 50px; height: 50px;" loading="lazy">
+            <div class="user-info-flex">
+                <h2>{{ current_user.fullname }}</h2>
+                <h3>@{{ current_user.username }}</h3>
+            </div>
+            <i class="ri-more-fill" data-toggle="modal" data-target="#postEditModal{{ loop.index }}"></i>
+        </div>
+        <div class="post-date">
+            <p>{{ post.date | to_datetime('%Y-%m-%d_%H-%M-%S') | relative_time }}</p>
+        </div>
+        <div class="description-container">
+            <h2>{{ post.desc }}</h2>
+        </div>
+        {% if post.img %}
+        <div class="post-img-container">
+            <img src="{{ url_for('static', filename= 'posts/' + post.img) }}" alt="Image Description" loading="lazy">
+        </div>
+        {% endif %}
+        <div class="post-footer">
+            <div class="post-interactions">
+                <i class="ri-heart-line like" id="like-button-{{ loop.index }}" data-post-id="{{ post.postID }}"
+                    data-is-liked="{{ 'true' if post.postID in user_likes else 'false' }}"
+                    onclick="pressLike('{{ loop.index }}')"></i>
+                <i class="ri-chat-3-line comment" id="comment-button-{{ loop.index }}" data-post-id="{{ post.postID }}"
+                    onclick="pressComment('{{ loop.index }}')"></i>
+            </div>
+            <i class="ri-bookmark-line save" id="save-button-{{ loop.index }}" data-post-id="{{ post.postID }}"
+                data-is-saved="{{ 'true' if post.postID in user_saved else 'false' }}"
+                onclick="pressSave('{{ loop.index }}')"></i>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="postEditModal{{ loop.index }}" tabindex="-1" role="dialog"
+        aria-labelledby="postEditModalLabel{{ loop.index }}" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="postEditModalLabel{{ loop.index }}">Edit Post</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" style="position: relative;">
+                    <form id="postForm{{ loop.index }}" action="{{ url_for('posting.edit_post', post_id=post.postID) }}"
+                        method="post">
+                        <div class="form-group">
+                            <label for="postDescription{{ loop.index }}">Description</label>
+                            <textarea id="postDescription{{ loop.index }}" name="postEditDesc"
+                                class="form-control">{{ post.desc }}</textarea>
+                        </div>
+                        <div class="modal-footer d-flex justify-content-between">
+                            <div>
+                                <button type="submit" class="btn btn-primary">Edit</button>
+                                <button type="button" class="btn btn-danger"
+                                    data-action="{{ url_for('posting.delete_post', post_id=post.postID) }}"
+                                    onclick="submitDeleteForm('{{ loop.index }}')">Delete</button>
+                            </div>
+                            <span id="post_limit_{{ loop.index }}">280 characters remaining</span>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% endfor %}
+</div>
+{% endmacro %}
+
+
+
+{% macro other_posts(userprofile, user_posts, user_likes, user_saved) %}
+<div class="post-master">
+    {% for post in user_posts %}
+    <div class="post-container">
+        <div class="user-info-container">
+            <img src="data:image/png;base64,{{ userprofile.pfp | b64encode }}" alt="Profile Picture" class="profile-pic"
+                style="width: 50px; height: 50px;" loading="lazy">
+            <div class="user-info-flex">
+                <h2>{{ userprofile.fullname }}</h2>
+                <h3>@{{ userprofile.username }}</h3>
+            </div>
+        </div>
+        <div class="post-date">
+            <p>{{ post.date | to_datetime('%Y-%m-%d_%H-%M-%S') | relative_time }}</p>
+        </div>
+        <div class="description-container">
+            <h2>{{ post.desc }}</h2>
+        </div>
+        {% if post.img %}
+        <div class="post-img-container">
+            <img src="{{url_for('static', filename= 'posts/' + post.img) }}" alt="Image Description" loading="lazy">
+        </div>
+        {% endif %}
+        <div class="post-footer">
+            <div class="post-interactions">
+                <i class="ri-heart-line like" id="like-button-{{ loop.index }}" data-post-id="{{ post.postID }}"
+                    data-is-liked="{{ 'true' if post.postID in user_likes else 'false' }}"
+                    onclick="pressLike('{{ loop.index }}')"></i>
+                <i class="ri-chat-3-line comment" id="comment-button-{{ loop.index }}" data-post-id="{{ post.postID }}"
+                    onclick="pressComment('{{ loop.index }}')"></i>
+            </div>
+            <i class="ri-bookmark-line save" id="save-button-{{ loop.index }}" data-post-id="{{ post.postID }}"
+                data-is-saved="{{ 'true' if post.postID in user_saved else 'false' }}"
+                onclick="pressSave('{{ loop.index }}')"></i>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endmacro %}
+
+
+{% macro following_posts(followed_posts, user_likes, user_saved) %}
+<div class="post-master">
+    {% for post in followed_posts %}
+    <div class="post-container">
+        <a href="/profiles/{{ post.user.username }}" style="text-decoration: none;">
+            <div class="user-info-container">
+                <img src="data:image/png;base64,{{ post.user.pfp | b64encode }}" alt="Profile Picture"
+                    class="profile-pic" style="width: 50px; height: 50px;" loading="lazy">
+                <div class="user-info-flex">
+                    <h2>{{ post.user.fullname }}</h2>
+                    <h3>@{{ post.user.username }}</h3>
+                </div>
+            </div>
+        </a>
+        <div class="post-date">
+            <p>{{ post.date | to_datetime('%Y-%m-%d_%H-%M-%S') | relative_time }}</p>
+        </div>
+        <div class="description-container">
+            <h2>{{ post.desc }}</h2>
+        </div>
+        {% if post.img %}
+        <div class="post-img-container">
+            <img src="{{url_for('static', filename= 'posts/' + post.img) }}" alt="Image Description" loading="lazy">
+        </div>
+        {% endif %}
+        <div class="post-footer">
+            <div class="post-interactions">
+                <i class="ri-heart-line like" id="like-button-{{ loop.index }}" data-post-id="{{ post.postID }}"
+                    data-is-liked="{{ 'true' if post.postID in user_likes else 'false' }}"
+                    onclick="pressLike('{{ loop.index }}')"></i>
+                <i class="ri-chat-3-line comment" id="comment-button-{{ loop.index }}" data-post-id="{{ post.postID }}"
+                    onclick="pressComment('{{ loop.index }}')"></i>
+            </div>
+            <i class="ri-bookmark-line save" id="save-button-{{ loop.index }}" data-post-id="{{ post.postID }}"
+                data-is-saved="{{ 'true' if post.postID in user_saved else 'false' }}"
+                onclick="pressSave('{{ loop.index }}')"></i>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endmacro %}
+
+
+{% macro fyp_posts(uninteracted_posts, user_likes, user_saved) %}
+<div class="post-master">
+    {% for post in uninteracted_posts %}
+    <div class="post-container">
+        <a href="/profiles/{{ post.user.username }}" style="text-decoration: none;">
+            <div class="user-info-container">
+                <img src="data:image/png;base64,{{ post.user.pfp | b64encode }}" alt="Profile Picture"
+                    class="profile-pic" style="width: 50px; height: 50px;" loading="lazy">
+                <div class="user-info-flex">
+                    <h2>{{ post.user.fullname }}</h2>
+                    <h3>@{{ post.user.username }}</h3>
+                </div>
+            </div>
+        </a>
+        <div class="post-date">
+            <p>{{ post.date | to_datetime('%Y-%m-%d_%H-%M-%S') | relative_time }}</p>
+        </div>
+        <div class="description-container">
+            <h2>{{ post.desc }}</h2>
+        </div>
+        {% if post.img %}
+        <div class="post-img-container">
+            <img src="{{url_for('static', filename= 'posts/' + post.img) }}" alt="Image Description" loading="lazy">
+        </div>
+        {% endif %}
+        <div class="post-footer">
+            <div class="post-interactions">
+                <i class="ri-heart-line like" id="like-button-{{ loop.index }}" data-post-id="{{ post.postID }}"
+                    data-is-liked="{{ 'true' if post.postID in user_likes else 'false' }}"
+                    onclick="pressLike('{{ loop.index }}')"></i>
+                <i class="ri-chat-3-line comment" id="comment-button-{{ loop.index }}" data-post-id="{{ post.postID }}"
+                    onclick="pressComment('{{ loop.index }}')"></i>
+            </div>
+            <i class="ri-bookmark-line save" id="save-button-{{ loop.index }}" data-post-id="{{ post.postID }}"
+                data-is-saved="{{ 'true' if post.postID in user_saved else 'false' }}"
+                onclick="pressSave('{{ loop.index }}')"></i>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endmacro %}
+
+
+
+{% macro post_comments(user_comments, current_user) %}
+{% for comments in user_comments %}
+<div class="post-container comment-container">
+    <div class="user-info-container">
+        <a href="/profiles/{{ comments.user.username }}" style="text-decoration: none;"><img
+                src="data:image/png;base64,{{ comments.user.pfp | b64encode }}" alt="Profile Picture"
+                class="profile-pic" style="width: 50px; height: 50px;" loading="lazy"></a>
+        <div class="user-info-flex">
+            <h2>{{ comments.user.fullname }}</h2>
+            <h3>@{{ comments.user.username }}</h3>
+        </div>
+        {% if comments.user.id == current_user.id %}
+        <i class="ri-more-fill" data-toggle="modal" data-target="#commentEditModal{{ loop.index }}"
+            style="visibility: visible;"></i>
+        {% else %}
+        <i class="ri-more-fill" data-toggle="modal" data-target="#commentEditModal{{ loop.index }}"
+            style="visibility: hidden;"></i>
+        {% endif %}
+    </div>
+
+    <div class="post-date">
+        <p>{{ comments.date | to_datetime('%Y-%m-%d_%H-%M-%S') | relative_time }}</p>
+    </div>
+    <div class="description-container">
+        <h2>{{ comments.comment }}</h2>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="commentEditModal{{ loop.index }}" tabindex="-1" role="dialog"
+    aria-labelledby="commentEditModalLabel{{ loop.index }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="commentEditModalLabel{{ loop.index }}">Edit Comment</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" style="position: relative;">
+                <form id="commentForm{{ loop.index }}"
+                    action="{{ url_for('posting.edit_comment', comment_id=comments.commentID) }}" method="post">
+                    <div class="form-group">
+                        <label for="commentDescription{{ loop.index }}">Comment</label>
+                        <textarea id="commentDescription{{ loop.index }}" name="commentEditDesc"
+                            class="form-control">{{ comments.comment }}</textarea>
+                    </div>
+                    <div class="modal-footer d-flex justify-content-between">
+                        <div>
+                            <button type="submit" class="btn btn-primary">Edit</button>
+                            <button type="button" class="btn btn-danger"
+                                data-action="{{ url_for('posting.delete_comment', comment_id=comments.commentID) }}"
+                                onclick="submitDeleteForm('{{ loop.index }}')">Delete</button>
+                        </div>
+                        <span id="post_limit_{{ loop.index }}">150 characters remaining</span>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endmacro %}
+
+
+
+{% macro saved_display(user_likes, user_saved, saved_obj) %}
+<div class="post-master">
+    {% for post in saved_obj %}
+    <div class="post-container">
+        <div class="user-info-container">
+            <img src="data:image/png;base64,{{ post.user.pfp | b64encode }}" alt="Profile Picture" class="profile-pic"
+                style="width: 50px; height: 50px;" loading="lazy">
+            <div class="user-info-flex">
+                <h2>{{ post.user.fullname }}</h2>
+                <h3>@{{ post.user.username }}</h3>
+            </div>
+        </div>
+        <div class="post-date">
+            <p>{{ post.date | to_datetime('%Y-%m-%d_%H-%M-%S') | relative_time }}</p>
+        </div>
+        <div class="description-container">
+            <h2>{{ post.desc }}</h2>
+        </div>
+        {% if post.img %}
+        <div class="post-img-container">
+            <img src="{{url_for('static', filename= 'posts/' + post.img) }}" alt="Image Description" loading="lazy">
+        </div>
+        {% endif %}
+        <div class="post-footer">
+            <div class="post-interactions">
+                <i class="ri-heart-line like" id="like-button-{{ loop.index }}" data-post-id="{{ post.postID }}"
+                    data-is-liked="{{ 'true' if post.postID in user_likes else 'false' }}"
+                    onclick="pressLike('{{ loop.index }}')"></i>
+                <i class="ri-chat-3-line comment" id="comment-button-{{ loop.index }}" data-post-id="{{ post.postID }}"
+                    onclick="pressComment('{{ loop.index }}')"></i>
+            </div>
+            <i class="ri-bookmark-line save" id="save-button-{{ loop.index }}" data-post-id="{{ post.postID }}"
+                data-is-saved="{{ 'true' if post.postID in user_saved else 'false' }}"
+                onclick="pressSave('{{ loop.index }}')"></i>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endmacro %}
+
+

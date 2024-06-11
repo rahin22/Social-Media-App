@@ -1,0 +1,123 @@
+{% from "macros/navbar.html" import navbar %}
+{% from "macros/imports.html" import head_imports %}
+{% from "macros/imports.html" import bootstrap_scripts %}
+{% from "macros/post_modal.html" import post_modal %}
+{% from "macros/post_display.html" import following_posts %}
+{% from "macros/post_display.html" import fyp_posts %}
+{%import "bootstrap/wtf.html" as wtf%}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {{ head_imports() }}
+    <title>Settings</title>
+</head>
+
+<body class="override">
+    {{ navbar(current_user) }}
+
+    <div class="settings-form">
+        <h2>Personal Information</h2>
+        <form class="infoform" method="POST" action="/settings">
+            <input type="hidden" name="save_info" value="1">
+            <div class="form-int">
+                {{ form.hidden_tag() }}
+                {{ form.fullname(value=current_user.fullname) }}
+                {{ form.dob(value=current_user.dob) }}
+                {{ form.gender(value=current_user.gender) }}
+                {% if form.fullname.errors %}
+                <ul class="errors">
+                    {% for error in form.fullname.errors %}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+            <div class="info-submit"><button class="save-button" type="submit">Save</button></div>
+        </form>
+    </div>
+
+    <div class="settings-form">
+        <h2>Username</h2>
+        <form class="infoform" method="POST" action="/settings">
+            <input type="hidden" name="save_username" value="1">
+            <div class="form-int">
+                {{ userForm.hidden_tag() }}
+                {{ userForm.username(value=current_user.username) }}
+                {% if userForm.username.errors %}
+                <ul class="errors">
+                    {% for error in userForm.username.errors %}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+            <div class="info-submit"><button class="save-button" type="submit">Save</button></div>
+        </form>
+    </div>
+
+    <div class="settings-form">
+        <h2>Change Password</h2>
+        <form class="infoform" method="POST" action="/settings">
+            <input type="hidden" name="save_password" value="1">
+            <div class="form-int">
+                {{ pform.hidden_tag() }}
+                {{ pform.oldpassword }}
+                {{ pform.newpassword }}
+                {{ pform.confirm }}
+            </div>
+            <div class="info-submit"><button class="save-button" type="submit">Save</button></div>
+            <ul class="errors">
+                {% for error in pform.oldpassword.errors %}
+                <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+            <ul class="errors">
+                {% for error in pform.newpassword.errors %}
+                <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+            <ul class="errors">
+                {% for error in pform.confirm.errors %}
+                <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <ul class="flashes">
+                {% for category, message in messages %}
+                <li class="{{ category }}" style="list-style: none;">{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+            {% endwith %}
+        </form>
+    </div>
+
+    <div class="settings-form">
+        <h2>Delete Account</h2>
+        <form class="infoform" method="POST" action="/settings">
+            <input type="hidden" name="delete_account" value="1">
+            <div class="form-int">
+                {{ delform.hidden_tag() }}
+                {{ delform.delpassword }}
+                {% if delform.delpassword.errors %}
+                <ul class="errors">
+                    {% for error in delform.delpassword.errors %}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+            <div class="info-submit"><button class="save-button delete-button" type="submit">Delete Account</button></div>
+        </form>
+    </div>
+
+    {{ post_modal(current_user) }}
+
+    {{ bootstrap_scripts() }}
+
+    <script type="text/javascript" src="{{ url_for('static', filename='main.js') }}"></script>
+</body>
+
+</html>

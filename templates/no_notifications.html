@@ -1,0 +1,38 @@
+{% from "macros/navbar.html" import navbar %}
+{% from "macros/imports.html" import head_imports %}
+{% from "macros/imports.html" import bootstrap_scripts %}
+{% from "macros/post_modal.html" import post_modal %}
+{% from "macros/post_display.html" import my_posts %}
+{% from "macros/post_display.html" import saved_display %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {{ head_imports() }}
+    <title>Notifications</title>
+    <style>
+    </style>
+</head>
+
+<body class="override">
+    {{ navbar(current_user) }}
+
+    <div class="profile-media">
+        <h2 class="notification-msg">You dont have any notifications yet</h2>
+    </div>
+
+
+
+
+    {{ post_modal(current_user) }}
+
+
+
+    {{ bootstrap_scripts() }}
+
+
+
+    <script type="text/javascript" src="{{ url_for('static', filename='main.js') }}"></script>
+</body>
+
+</html>

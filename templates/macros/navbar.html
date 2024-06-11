@@ -1,0 +1,79 @@
+{% macro navbar(current_user) %}
+<div id="scrollTop" onclick='scrollToTop()'>
+    <i class="ri-arrow-up-line"></i>
+</div>
+
+<div class="navcontainer">
+    <nav>
+        <div class="nav-logo" onclick="homeRedir()">
+            <i class="ri-twitter-x-line"></i>
+            <h2 id="logo">Yitter?</h2>
+        </div>
+        <div class="nav-menu" id="nav-menu">
+            <ul class="nav-list">
+                <li>
+                    <a href="/" class="nav-link" data-inViewport='slideRight'>
+                        <i class="ri-home-5-line nav-icon"></i>
+                        <span class="link">Home</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="nav-link" id="create-button" data-inViewport='slideRight' onclick="openPostModal()">
+                        <i class="ri-add-circle-line nav-icon"></i>
+                        <span class="link">Create</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/messages" class="nav-link" data-inViewport='slideRight'>
+                        <i class="ri-message-3-line nav-icon"></i>
+                        <span class="link">Messages</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/notifications" class="nav-link" data-inViewport='slideRight'>
+                        <i class="ri-notification-2-line nav-icon"></i>
+                        <span class="link">Notifications</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="/myprofile" class="nav-link" data-inViewport='slideRight'>
+                        <img src="data:image/png;base64,{{current_user.pfp | b64encode}}" class="profile-pic" style="width: 24px; height: 24px;">
+                        <span class="link">Profile</span>
+                    </a>
+                </li>
+                <div class="bottomitems">
+                    <li>
+                        <a href="/settings" class="nav-link" data-inViewport='slideRight'>
+                            <i class="ri-settings-5-line nav-icon"></i>
+                            <span class="link">Settings</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/logout" class="nav-link" data-inViewport='slideRight'>
+                            <i class="ri-logout-box-line nav-icon"></i>
+                            <span class="link">Logout</span>
+                        </a>
+                    </li>
+                </div>
+            </ul>
+        </div>
+        <div class="search-container">
+            <form id="search-form" action="/search" method="get">
+                <input type="text" class="search-input" name="query" placeholder="Search...">
+                <div class="search-dropdown">
+                    <ul class="search-results"></ul>
+                </div>
+            </form>
+        </div>
+
+        <div class="theme-switcher">
+            <i class="ri-sun-line" id="sun" onclick="changeToDark()"></i>
+            <i class="ri-moon-line" id="moon" onclick="changeToLight()"></i>
+        </div>
+    </nav>
+</div>
+
+<div id="loading-bar">
+    <div class="inner"></div>
+</div>
+{% endmacro %}

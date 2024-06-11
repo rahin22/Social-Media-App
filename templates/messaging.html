@@ -1,0 +1,215 @@
+{% from "macros/navbar.html" import navbar %}
+{% from "macros/imports.html" import head_imports %}
+{% from "macros/imports.html" import bootstrap_scripts %}
+{% from "macros/post_modal.html" import post_modal %}
+{% from "macros/post_display.html" import my_posts %}
+{% from "macros/message_display.html" import conversation_display %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {{ head_imports() }}
+    <style>
+        .nav-menu {
+            width: 70px;
+            padding: 30px 16px;
+        }
+
+        .nav-menu ul li {
+            padding: 5px 0;
+            transform: translateX(-7px);
+        }
+
+        .nav-link span.link {
+            display: none;
+        }
+
+        .nav-logo h2 {
+            display: none;
+        }
+
+
+        @media only screen and (max-width: 600px) {
+            .nav-menu {
+                width: 100%;
+                height: 60px;
+                display: flex;
+                flex-direction: row;
+                justify-content: space-around;
+                background-color: var(--bg-color);
+                align-items: center;
+                padding: 0;
+                border-right: none;
+                border-top: #000 2px solid;
+                bottom: 0;
+                right: 0;
+                left: 0;
+                position: fixed;
+            }
+
+            .nav-menu ul li:nth-child(1) {
+                padding-top: 0px;
+            }
+
+            .nav-menu ul {
+                display: flex;
+                flex-direction: row;
+                justify-content: space-around;
+                width: 100%;
+                margin-top: 20px;
+                padding: 0;
+            }
+
+            .nav-menu ul li {
+                padding: 0;
+                flex-grow: 1;
+            }
+
+            .nav-menu ul li a {
+                padding: 10px 0;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                font-size: var(--text-small-font);
+            }
+
+            .nav-menu ul li a img {
+                margin-top: 5px;
+            }
+
+            .nav-menu ul li a .nav-icon {
+                font-size: 1.5em;
+                margin-bottom: 5px;
+            }
+
+            .nav-logo h2 {
+                display: none;
+            }
+
+            .bottomitems {
+                display: none;
+            }
+
+            .nav-link span.link {
+                display: none;
+            }
+        }
+
+        body,
+        html {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        .none-selected{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20%;
+            color: var(--text-color);
+        }
+
+        .none-selected i{
+            font-size: 70px;
+        }
+
+        .no-messages{
+            font-size: var(--text-large-font);
+            text-align: center;
+        }
+
+    </style>
+    <title>Messages</title>
+</head>
+
+<body class="override">
+    {{ navbar(current_user) }}
+
+
+    <div class="messaging-master">
+        <div class="conversation-media">
+            <h2>Messages</h2>
+            {{ conversation_display(current_user, user_conversation) }}
+        </div>
+
+        <div class="messaging-window">
+            <div class="none-selected">
+                <h2 class="empty-prompt">Select a Conversation</h2>
+                <i class="ri-message-3-line"></i>
+                <h2 class="no-messages">Dont See Any?<br>Search Up Someone to Message Them</h2>
+            </div>
+        </div>
+    </div>
+
+
+    {{ post_modal(current_user) }}
+
+
+
+    {{ bootstrap_scripts() }}
+
+    <script>
+
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var conversationContainers = document.querySelectorAll('.conversation-container');
+
+            conversationContainers.forEach(function (container) {
+                container.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    conversationContainers.forEach(function (container) {
+                        container.classList.remove('active');
+                    });
+                    container.classList.add('active');
+                    var conversationID = this.getAttribute('data-conversation-id');
+
+                    var xhttp = new XMLHttpRequest();
+                    xhttp.open('POST', '/load_messages', true);
+                    xhttp.setRequestHeader('Content-Type', 'application/json');
+                    xhttp.onload = function () {
+                        if (xhttp.status === 200) {
+                            var messagingWindow = document.querySelector('.messaging-window');
+                            messagingWindow.innerHTML = xhttp.responseText;
+                            scrollToBottom();
+                        } else {
+                            console.log('Error');
+                        }
+                    };
+                    xhttp.send(JSON.stringify({ conversationID: conversationID }));
+                });
+            });
+        });
+
+
+
+        function sendMessage(event) {
+            event.preventDefault();
+            var formData = new FormData(document.getElementById("message-form"));
+
+            var xhttp = new XMLHttpRequest();
+            xhttp.open('POST', '/send_message', true);
+            xhttp.onload = function () {
+                if (xhttp.status === 200) {
+                    document.querySelector('.conversation-messages').innerHTML = xhttp.responseText;
+                    scrollToBottom();
+                } else {
+                    console.error('Error', xhttp.status);
+                }
+            };
+            xhttp.send(formData);
+        }
+
+        function scrollToBottom() {
+            var messageList = document.getElementById('message-list');
+            if (messageList) {
+                messageList.scrollTop = messageList.scrollHeight;
+            }
+        }
+    </script>
+
+
+    <script type="text/javascript" src="{{ url_for('static', filename='main.js') }}"></script>
+</body>
+
+</html>

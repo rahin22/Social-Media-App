@@ -1,0 +1,94 @@
+{% from "macros/navbar.html" import navbar %}
+{% from "macros/imports.html" import head_imports %}
+{% from "macros/imports.html" import bootstrap_scripts %}
+{% from "macros/post_modal.html" import post_modal %}
+{% from "macros/post_display.html" import my_posts %}
+{% from "macros/post_display.html" import saved_display %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {{ head_imports() }}
+    <title>Notifications</title>
+    <style>
+        .post-master .post-container:last-child {
+            margin-bottom: 0px;
+        }
+    </style>
+</head>
+
+<body class="override">
+    {{ navbar(current_user) }}
+
+    <div class="profile-media">
+        <div class="post-master">
+            {% for notification in user_notifications %}
+            <div class="post-container">
+                <div class="user-info-container">
+                    <a href="/profiles/{{ notification.user_notifying.username }}" style="text-decoration: none;">
+                        <img src="data:image/png;base64,{{ notification.user_notifying.pfp | b64encode }}"
+                            alt="Profile Picture" class="profile-pic" style="width: 50px; height: 50px;" loading="lazy">
+                    </a>
+                    <div class="user-info-flex">
+                        <h2>{{ notification.user_notifying.fullname }}</h2>
+                        <h3>@{{ notification.user_notifying.username }}</h3>
+                    </div>
+                </div>
+                <div class="post-date">
+                    <p>{{ notification.date | to_datetime('%Y-%m-%d_%H-%M-%S') | relative_time }}</p>
+                </div>
+                <div class="description-container">
+                    {% if notification.type == 'follow' %}
+                    <h2>{{ notification.content }}</h2>
+                    {% else %}
+                    {% if notification.post %}
+                    <h2>{{ notification.content }}</h2>
+                    <div class="post-container">
+                        <div class="user-info-container">
+                            <img src="data:image/png;base64,{{ current_user.pfp | b64encode }}" alt="Profile Picture" class="profile-pic"
+                                style="width: 50px; height: 50px;" loading="lazy">
+                            <div class="user-info-flex">
+                                <h2>{{ current_user.fullname }}</h2>
+                                <h3>@{{ current_user.username }}</h3>
+                            </div>
+                        </div>
+                        <div class="post-date">
+                            <p>{{ notification.post.date | to_datetime('%Y-%m-%d_%H-%M-%S') | strftime('%I:%M %p | %b %d, %Y') }}</p>
+                        </div>
+                        <div class="description-container">
+                            <h2>{{ notification.post.desc }}</h2>
+                        </div>
+                        {% if notification.post.img %}
+                        <div class="post-img-container">
+                            <img src="{{url_for('static', filename= 'posts/' + notification.post.img) }}" alt="Image Description" loading="lazy">
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+
+
+
+    {{ post_modal(current_user) }}
+
+
+
+    {{ bootstrap_scripts() }}
+
+
+
+    <script type="text/javascript" src="{{ url_for('static', filename='main.js') }}"></script>
+</body>
+
+</html>
+
+
+
+
+

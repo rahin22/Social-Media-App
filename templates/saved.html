@@ -1,0 +1,277 @@
+{% from "macros/navbar.html" import navbar %}
+{% from "macros/imports.html" import head_imports %}
+{% from "macros/imports.html" import bootstrap_scripts %}
+{% from "macros/post_modal.html" import post_modal %}
+{% from "macros/post_display.html" import my_posts %}
+{% from "macros/post_display.html" import saved_display %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {{ head_imports() }}
+    <title>My Profile</title>
+</head>
+
+<body class="override">
+    {{ navbar(current_user) }}
+
+    <div class="profile-info">
+        <div class="pfp-container" id="pfp-container">
+            <img src="data:image/png;base64,{{current_user.pfp | b64encode}}" alt="Profile Picture" class="profile-pic"
+                id="change-pfp" style="width: 170px; height: 170px;">
+        </div>
+        <div class="profile-stats">
+            <div class="profile-vital">
+                <h1>{{ current_user.username }}</h1>
+                <div class="user-interactions">
+                    <button id="editProfileButton">Edit Profile</button>
+                    <a href="/logout"><button><i class="ri-logout-box-line nav-icon"></i>Logout</button></a>
+                </div>
+            </div>
+            <div class="profile-metrics">
+                <h2>{{ posts }} Posts</h2>
+                <h2>{{ followers }} Followers</h2>
+                <h2>{{ following }} Following</h2>
+            </div>
+            <h3>{{ current_user.fullname }}</h3>
+            <div class="bio-box">
+                <h3>{{ current_user.bio }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="profile-navigation">
+        <ul class="nav nav-tabs ">
+            <li class="nav-item">
+                <a class="nav-link tab-link" aria-current="page" href="/myprofile" id="posts-tab"><i
+                        class="ri-grid-line"></i> Posts</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active tab-link" href="/myprofile/saved" id="saved-tab"><i class="ri-bookmark-line"></i>
+                    Saved</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link tab-link" href="/settings" id="mentions-tab"><i class="ri-settings-5-line"></i> Settings</a>
+            </li>
+        </ul>
+    </div>
+
+    <div class="profile-media" id="profile-media">
+        {{ saved_display(user_likes, user_saved, saved_obj) }}
+    </div>
+
+
+
+
+
+
+
+
+
+    <!-- Modal -->
+    <div class="modal fade" id="profilePictureModal" tabindex="-1" role="dialog"
+        aria-labelledby="profilePictureModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="profilePictureModalLabel">Set Profile Picture</h5>
+                </div>
+                <div class="modal-body" style="position: relative;">
+                    <div class="prevCont">
+                        <img id="previewImage">
+                    </div>
+                    <form action="{{ url_for('myprofile.updatepfp') }}" method="post" enctype="multipart/form-data">
+                        <div class="form-group">
+                            <label for="profile_picture">Upload Profile Picture</label>
+                            <input type="file" class="form-control-file" id="profile_picture" name="profile_picture"
+                                accept=".png, .jpg, .jpeg, .gif" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Upload</button>
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">Cancel</button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Modal -->
+    <div class="modal fade" id="editProfileModal" tabindex="-1" role="dialog" aria-labelledby="editProfileLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content custom-modal">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editProfileLabel">Edit Profile</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="prevCont">
+                        <img id="edit_previewImage">
+                    </div>
+                    <form id="editProfileForm" action="{{ url_for('myprofile.editProfile') }}" method="post" enctype="multipart/form-data">
+
+                        <div class="form-group">
+                            <label for="edit_profile_picture">Upload Profile Picture</label>
+                            <input type="file" class="form-control-file" id="edit_profile_picture" name="edit_profile_picture"
+                                accept=".png, .jpg, .jpeg, .gif">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="bioContent">Change your bio</label>
+                            <textarea class="form-control" id="bioContent" name="bioContent" rows="3"
+                                required>{{ current_user.bio }}</textarea>
+                        </div>
+
+
+                        <div class="modal-footer">
+                            <span id="bio_limit">150 characters remaining</span>
+                            <button type="submit" class="btn btn-primary">Save</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{ post_modal(current_user) }}
+
+
+
+    {{ bootstrap_scripts() }}
+
+    <script>
+        $(document).ready(function () {
+            $('#pfp-container').click(function () {
+                $('#profilePictureModal').modal('show');
+            });
+        });
+
+        $(document).ready(function () {
+            $('#editProfileButton').click(function () {
+                $('#editProfileModal').modal('show');
+            });
+        });
+
+        $(document).ready(function () {
+            function readURL(input) {
+                if (input.files && input.files[0]) {
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        $('#previewImage').attr('src', e.target.result);
+                    }
+                    reader.readAsDataURL(input.files[0]);
+                }
+            }
+
+            $("#profile_picture").change(function () {
+                readURL(this);
+            });
+        });
+
+
+        $(document).ready(function () {
+            function readURL(input) {
+                if (input.files && input.files[0]) {
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        $('#edit_previewImage').attr('src', e.target.result);
+                    }
+                    reader.readAsDataURL(input.files[0]);
+                }
+            }
+
+            $("#edit_profile_picture").change(function () {
+                readURL(this);
+            });
+        });
+
+        $(document).ready(function () {
+            function readURL(input) {
+                if (input.files && input.files[0]) {
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        $('#edit_previewImage').attr('src', e.target.result);
+                    }
+                    reader.readAsDataURL(input.files[0]);
+                }
+            }
+
+            $("#profile_picture").change(function () {
+                readURL(this);
+            });
+        });
+
+
+        $(document).ready(function () {
+            $('.ri-more-fill').click(function () {
+                $('#postEditModal').modal('show');
+            });
+        });
+
+        function submitDeleteForm(index) {
+            var form = document.getElementById('postForm' + index);
+            var deleteButton = form.querySelector('.btn-danger');
+            var deleteAction = deleteButton.getAttribute('data-action');
+            form.action = deleteAction;
+            form.submit();
+        }
+
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var maxCharacters = 280;
+            document.querySelectorAll('[id^=postDescription]').forEach(function (postEdit, index) {
+                var postLimit = document.getElementById('post_limit_' + (index + 1));
+                postEdit.addEventListener('input', function () {
+                    var remainingCharacters = maxCharacters - postEdit.value.length;
+                    postLimit.textContent = remainingCharacters + ' characters remaining';
+
+                    if (remainingCharacters <= 0) {
+                        postEdit.value = postEdit.value.slice(0, maxCharacters);
+                        remainingCharacters = 0;
+                        postLimit.textContent = remainingCharacters + ' characters remaining';
+                    }
+                });
+
+                postEdit.addEventListener('keydown', function (event) {
+                    var remainingCharacters = maxCharacters - postEdit.value.length;
+                    if (remainingCharacters <= 0 && event.key !== 'Backspace' && event.key !== 'Delete') {
+                        event.preventDefault();
+                    }
+                });
+            });
+        });
+
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var maxCharacters = 150;
+            var bioUpdate = document.getElementById('bioContent');
+            var bioLimit = document.getElementById('bio_limit');
+
+            bioUpdate.addEventListener('input', function () {
+                var remainingCharacters = 150 - bioUpdate.value.length;
+                bioLimit.textContent = remainingCharacters + ' characters remaining';
+
+                if (remainingCharacters <= 0) {
+                    bioUpdate.value = bioUpdate.value.slice(0, maxCharacters);
+                    remainingCharacters = 0;
+                    bioLimit.textContent = remainingCharacters + ' characters remaining';
+                }
+            });
+
+            bioUpdate.addEventListener('keydown', function (event) {
+                var remainingCharacters = maxCharacters - bioUpdate.value.length;
+                if (remainingCharacters <= 0 && event.key !== 'Backspace' && event.key !== 'Delete') {
+                    event.preventDefault();
+                }
+            });
+        });
+    </script>
+
+
+    <script type="text/javascript" src="{{ url_for('static', filename='main.js') }}"></script>
+</body>
+
+</html>

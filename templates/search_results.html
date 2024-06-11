@@ -1,0 +1,50 @@
+{% from "macros/navbar.html" import navbar %}
+{% from "macros/imports.html" import head_imports %}
+{% from "macros/imports.html" import bootstrap_scripts %}
+{% from "macros/post_modal.html" import post_modal %}
+{% from "macros/post_display.html" import my_posts %}
+{% from "macros/post_display.html" import saved_display %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {{ head_imports() }}
+    <title>{{ query }} | Yitter?</title>
+</head>
+
+<body class="override">
+    {{ navbar(current_user) }}
+
+    <div class="search-page">
+        <h1>Search Results for "{{ query }}"</h1>
+        {% for result in results %}
+        <a href="profiles/{{ result[0] }}" style="text-decoration: none;">
+        <div class="user-search">
+            <div id="search-img">
+                <img src="data:image/jpeg;base64,{{ result[2] }}" class="profile-pic" alt="Profile Picture" style="width: 50px; height: 50px;">
+            </div>
+            <div class="search-info">
+                <span class="search-username">@{{ result[0] }}</span>
+                <span class="search-fullname">{{ result[4] }}</span>
+                <span class="search-bio">{{ result[3] }}</span>
+            </div>
+        </div>
+        </a>
+        {% endfor %}
+    </div>
+
+
+
+
+    {{ post_modal(current_user) }}
+
+
+
+    {{ bootstrap_scripts() }}
+
+
+
+    <script type="text/javascript" src="{{ url_for('static', filename='main.js') }}"></script>
+</body>
+
+</html>
