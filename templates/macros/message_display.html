@@ -28,7 +28,7 @@
         {% for message in messages %}
         <div class="message">
             <div class="date-sent">
-                <p>{{ message.date | to_datetime('%Y-%m-%d_%H-%M-%S') | relative_time }}</p>
+                <img src="data:image/png;base64,{{ message.sender.pfp | b64encode }}" alt="Profile Picture" class="profile-pic" id="message-pfp" style="height: 50px; width: 50px;">
                 <p id="date-msg">{{ message.date | to_datetime('%Y-%m-%d_%H-%M-%S') | strftime('%I:%M %p | %b %d, %Y')}}</p>
             </div>
             <p>@{{ message.sender.username }}:</p>
